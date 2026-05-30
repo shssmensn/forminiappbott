@@ -74,7 +74,9 @@
 <div id="modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.7); justify-content:center; align-items:center;">
     <div style="background:white; padding:20px; border-radius:8px; display:flex; flex-direction:column; gap:10px; width:300px;">
         <h3>Подать объявление</h3>
-        <input id="cName" placeholder="Название авто">
+        <select id="cName">
+    <option value="">Выберите автомобиль</option>
+</select>
         <input id="cPrice" type="number" placeholder="Цена в $">
         <button class="btn-sell" onclick="addCar()">Разместить</button>
         <button onclick="document.getElementById('modal').style.display='none'">Отмена</button>
@@ -87,7 +89,32 @@
     tg.expand(); 
 
     let cars = JSON.parse(localStorage.getItem('myCars')) || [];
-    let currentCarIndex = -1; 
+    let currentCarIndex = -1;
+    let cars = JSON.parse(localStorage.getItem('myCars')) || [];
+let currentCarIndex = -1;
+
+let garageCars = [
+    "BMW M5",
+    "Mercedes E63",
+    "Toyota Supra"
+];
+
+function loadGarageCars() {
+
+    let select = document.getElementById("cName");
+
+    garageCars.forEach(car => {
+
+        let option = document.createElement("option");
+
+        option.value = car;
+        option.textContent = car;
+
+        select.appendChild(option);
+
+    });
+
+}
     
     function render() {
         document.getElementById('grid').innerHTML = cars.map((c, i) => `
@@ -103,6 +130,52 @@
         currentCarIndex = i;
         document.getElementById('d-name').innerText = cars[i].name;
         document.getElementById('d-price').innerText = cars[i].price + ' $';
+        document.getElementById('list-view').style.display = 'none';
+        document.getElementById('detail-view').style.display = 'block';
+    }
+
+    function hideDetails() {
+        document.getElementById('detail-view').style.display = 'none';
+        document.getElementById('list-view').style.display = 'block';
+    }
+
+    function removeCurrentCar() {
+        if(currentCarIndex !== -1) {
+            cars.splice(currentCarIndex, 1);
+            localStorage.setItem('myCars', JSON.stringify(cars));
+            render();
+            hideDetails();
+        }
+    }
+
+    function addCar() {
+        let name = document.getElementById('cName').value;
+        let price = document.getElementById('cPrice').value;
+        if(!name || !price) return alert("Введите данные!");
+
+        // Отправка данных боту
+        tg.sendData(JSON.stringify({
+            action: 'add_car',
+            name: name,
+            price: price
+        }));
+
+        cars.push({name, price});
+        localStorage.setItem('myCars', JSON.stringify(cars));
+        render();
+        document.getElementById('modal').style.display = 'none';
+    }
+
+    function deleteCar(i) {
+        cars.splice(i, 1);
+        localStorage.setItem('myCars', JSON.stringify(cars));
+        render();
+    }
+    loadGarageCars();
+render();
+</script>
+</body>
+</html>
         document.getElementById('list-view').style.display = 'none';
         document.getElementById('detail-view').style.display = 'block';
     }
