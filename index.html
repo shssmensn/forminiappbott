@@ -86,31 +86,56 @@
 <script>
     // Инициализация Telegram WebApp
     let tg = window.Telegram.WebApp;
-    tg.expand(); 
+    alert("Telegram: " + typeof window.Telegram);
+alert("WebApp: " + typeof window.Telegram.WebApp);
+    tg.expand();
+    document.body.innerHTML +=
+    "<pre>" +
+    JSON.stringify(tg.initDataUnsafe, null, 2) +
+    "</pre>";
+    alert(JSON.stringify(tg.initDataUnsafe));
 
-    let cars = JSON.parse(localStorage.getItem('myCars')) || [];
-    let currentCarIndex = -1;
     let cars = JSON.parse(localStorage.getItem('myCars')) || [];
 let currentCarIndex = -1;
 
 let garageCars = [];
 
-fetch(
-    "/get_cars?user_id=" +
-    tg.initDataUnsafe.user.id
-)
-.then(r => r.json())
-.then(data => {
+console.log(tg.initDataUnsafe);
 
-    garageCars = data;
+if (tg.initDataUnsafe.user) {
 
-    loadGarageCars();
+    fetch(
+        "https://grand-mobile-api.onrender.com/get_cars?user_id=" +
+        tg.initDataUnsafe.user.id
+    )
+    .then(response => response.json())
+    .then(data => {
 
-});
+        garageCars = data;
+
+        console.log("Машины:", garageCars);
+
+        loadGarageCars();
+
+    })
+    .catch(error => {
+
+        console.log("Ошибка:", error);
+
+    });
+
+} else {
+
+    alert("USER НЕ ПОЛУЧЕН");
+
+}
 
 function loadGarageCars() {
 
     let select = document.getElementById("cName");
+
+    select.innerHTML =
+        '<option value="">Выберите автомобиль</option>';
 
     garageCars.forEach(car => {
 
@@ -124,16 +149,26 @@ function loadGarageCars() {
     });
 
 }
+render();
     
     function render() {
-        document.getElementById('grid').innerHTML = cars.map((c, i) => `
+    document.getElementById("grid").innerHTML =
+        cars.map((c, i) => `
             <div class="card" onclick="showDetails(${i})">
-                <button class="del-btn" onclick="event.stopPropagation(); deleteCar(${i})">x</button>
+                <button class="del-btn"
+                    onclick="event.stopPropagation(); deleteCar(${i})">
+                    x
+                </button>
+
                 <div class="img-box"></div>
+
                 <div class="price">${c.price} $</div>
+
                 <div class="name">${c.name}</div>
-            </div>`).join('');
-    }
+
+            </div>
+        `).join("");
+}
 
     function showDetails(i) {
         currentCarIndex = i;
