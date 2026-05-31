@@ -122,7 +122,7 @@
     }
 
     function loadCarsData(userId) {
-        fetch(`https://52f3077bc29d1a75-5-77-201-225.serveusercontent.com/get_cars?user_id=${userId}`)
+        fetch(`https://grand-mobile-api.onrender.com/get_cars?user_id=${userId}`)
             .then(r => {
                 if (!r.ok) throw new Error(`HTTP ${r.status}`);
                 return r.json();
