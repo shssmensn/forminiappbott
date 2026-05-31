@@ -73,6 +73,7 @@
 <div id="modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.7); justify-content:center; align-items:center;">
     <div style="background:white; padding:20px; border-radius:8px; display:flex; flex-direction:column; gap:10px; width:300px;">
         <h3>Подать объявление</h3>
+        <p style="margin:0 0 8px 0; font-weight:600;">Выберите автомобиль для нового объявления</p>
         <select id="cName">
             <option value="">Выберите автомобиль</option>
         </select>
@@ -93,16 +94,30 @@
         return tg.initDataUnsafe?.user?.id || null;
     }
 
-    // === ИСПРАВЛЕНИЕ: сразу показываем тестовые машины ===
     function loadCarsData(userId) {
-        // ТЕСТОВЫЕ ДАННЫЕ (убери, если хочешь работать с реальным API)
+        // ТЕСТОВЫЕ ДАННЫЕ
         cars = [
             { name: "BMW X5", price: 85000 },
             { name: "Mercedes E-Class", price: 65000 },
             { name: "Audi Q7", price: 72000 },
-            { name: "Tesla Model Y", price: 95000 }
+            { name: "Tesla Model Y", price: 95000 },
+            { name: "Ford Explorer", price: 45000 },
+            { name: "Honda CR-V", price: 52000 },
+            { name: "Volkswagen Tiguan", price: 38000 },
+            { name: "Skoda Kodiaq", price: 41000 },
+            { name: "Toyota Camry", price: 48000 }
         ];
         render();
+
+        // Заполняем селект — только свободные тачки
+        const select = document.getElementById('cName');
+        select.innerHTML = '<option value="">Выберите автомобиль</option>';
+        cars.forEach(car => {
+            const opt = document.createElement('option');
+            opt.value = car.name;
+            opt.textContent = `${car.name} — ${car.price} $`;
+            select.appendChild(opt);
+        });
     }
 
     function render() {
@@ -166,7 +181,7 @@
         }
     }
 
-    window.onload = loadGarageCars;   // оставляем функцию, но она теперь не используется
+    window.onload = loadGarageCars;
 </script>
 </body>
 </html>
