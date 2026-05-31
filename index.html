@@ -36,7 +36,6 @@
     </style>
 </head>
 <body>
-    <h1 style="color:red">VERSION 999</h1>
 
 <div class="main-container">
     <div id="list-view">
@@ -134,26 +133,43 @@ if (tg.initDataUnsafe.user) {
 
 }
 
+// --- ИСПРАВЛЕННЫЙ БЛОК ---
+
 function loadGarageCars() {
+    let userId = window.Telegram.WebApp.initDataUnsafe.user?.id || "5633124867";
+    
+    console.log("Загрузка машин для ID:", userId);
 
-    let select = document.getElementById("cName");
+    fetch(`https://grand-mobile-api.onrender.com/get_cars?user_id=${userId}`)
+        .then(response => response.json())
+        .then(data => {
+            console.log("Данные из базы:", data);
+            
+            // 1. Обновляем выпадающий список в модальном окне
+            let select = document.getElementById("cName");
+            select.innerHTML = '<option value="">Выберите автомобиль</option>';
+            
+            // 2. Обновляем массив машин, которые мы отображаем на экране
+            // Преобразуем данные из базы в формат объектов {name, price}
+            cars = data.map(carName => ({ name: carName, price: "Цена?" }));
+            
+            data.forEach(carName => {
+                let option = document.createElement("option");
+                option.value = carName;
+                option.textContent = carName;
+                select.appendChild(option);
+            });
 
-    select.innerHTML =
-        '<option value="">Выберите автомобиль</option>';
-
-    garageCars.forEach(car => {
-
-        let option = document.createElement("option");
-
-        option.value = car;
-        option.textContent = car;
-
-        select.appendChild(option);
-
-    });
-
+            // 3. Самое важное: ПЕРЕРЕНДЕРИВАЕМ экран с новыми данными
+            render(); 
+        })
+        .catch(error => console.error('Ошибка:', error));
 }
-render();
+
+// Запускаем при старте
+loadGarageCars();
+    
+
     
     function render() {
     document.getElementById("grid").innerHTML =
@@ -219,8 +235,10 @@ render();
         localStorage.setItem('myCars', JSON.stringify(cars));
         render();
     }
+
+    // Оставь только эту одну строчку:
     loadGarageCars();
-render();
+
 </script>
 </body>
 </html>
