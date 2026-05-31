@@ -28,11 +28,16 @@
 
         #detail-view { display: none; background: white; padding: 20px; border-radius: 8px; }
         .spec-row { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #eee; }
+
+        /* Красная надпись для проверки версии */
+        .version-check { color: red; font-weight: bold; text-align: center; margin: 5px 0; }
     </style>
 </head>
 <body>
 
 <div class="main-container">
+    <div class="version-check">🔴 ВЕРСИЯ КОДА 2.1 (31 мая)</div>
+    
     <div id="list-view">
         <div class="header">
             <div>🚗 Дром</div>
@@ -94,45 +99,31 @@
 
     function loadGarageCars() {
         const userId = getUserId();
-
         if (!userId) {
-            console.error("❌ Telegram User ID не получен!");
-            alert("Откройте приложение через Telegram Mini App!");
+            console.error("❌ User ID не получен!");
+            alert("Откройте приложение через Telegram!");
             return;
         }
 
-        console.log("✅ Загружаем машины для user_id:", userId);
-
         fetch(`https://grand-mobile-api.onrender.com/get_cars?user_id=${userId}`)
-            .then(response => response.json())
+            .then(r => r.json())
             .then(data => {
-                console.log("📦 Машины из базы:", data);
-                
-                if (data.length === 0) {
-                    console.warn("В базе нет машин для этого пользователя");
-                }
+                console.log("Машины:", data);
+                cars = data.map(name => ({name, price: "Цена?"}));
 
-                cars = data.map(carName => ({
-                    name: carName,
-                    price: "Цена?"
-                }));
-
-                // Заполняем селект
+                // Заполняем список автомобилей
                 const select = document.getElementById('cName');
                 select.innerHTML = '<option value="">Выберите автомобиль</option>';
-                
-                data.forEach(carName => {
-                    let option = document.createElement("option");
-                    option.value = carName;
-                    option.textContent = carName;
-                    select.appendChild(option);
+                data.forEach(name => {
+                    let opt = document.createElement('option');
+                    opt.value = name;
+                    opt.textContent = name;
+                    select.appendChild(opt);
                 });
 
                 render();
             })
-            .catch(err => {
-                console.error("Ошибка загрузки машин:", err);
-            });
+            .catch(err => console.error(err));
     }
 
     function render() {
@@ -171,44 +162,30 @@
         let name = document.getElementById('cName').value;
         let price = document.getElementById('cPrice').value;
 
-        console.log("Попытка добавить:", { name, price });
-
         if (!name) {
-            alert("Выберите автомобиль!");
+            alert("❌ Выберите автомобиль из списка!");
             return;
         }
         if (!price) {
-            alert("Введите цену!");
+            alert("❌ Введите цену!");
             return;
         }
 
-        const userId = getUserId();
-        if (!userId) {
-            alert("Ошибка: Telegram ID не найден");
-            return;
-        }
-
-        tg.sendData(JSON.stringify({
-            action: 'add_car',
-            name: name,
-            price: price,
-            user_id: userId
-        }));
+        tg.sendData(JSON.stringify({ action: 'add_car', name, price, user_id: getUserId() }));
 
         cars.push({name, price});
         render();
         document.getElementById('modal').style.display = 'none';
-        alert("Объявление успешно добавлено!");
+        alert("✅ Объявление добавлено!");
     }
 
     function deleteCar(i) {
-        if (confirm("Удалить объявление?")) {
+        if (confirm("Удалить?")) {
             cars.splice(i, 1);
             render();
         }
     }
 
-    // Запуск
     window.onload = loadGarageCars;
 </script>
 </body>
