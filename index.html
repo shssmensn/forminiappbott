@@ -84,14 +84,13 @@
 </div>
 
 <script>
+<script>
     const tg = window.Telegram.WebApp;
     tg.expand();
     tg.ready();
 
     let cars = [];
     let currentCarIndex = -1;
-
-    console.log("🔍 Telegram InitDataUnsafe:", tg.initDataUnsafe);
 
     function getUserId() {
         return tg.initDataUnsafe?.user?.id || null;
@@ -100,20 +99,25 @@
     function loadGarageCars() {
         const userId = getUserId();
         if (!userId) {
-            console.error("❌ User ID не получен!");
-            alert("Откройте приложение через Telegram!");
+            alert("❌ Не удалось получить Telegram ID");
             return;
         }
 
-        fetch(`https://grand-mobile-api.onrender.com/get_cars?user_id=${userId}`)
+        // ←←← ИЗМЕНИ НА АКТУАЛЬНЫЙ АДРЕС СВОЕГО БОТА ←←←
+        fetch(`https://твой-домен.ru/get_cars?user_id=${userId}`)
             .then(r => r.json())
             .then(data => {
-                console.log("Машины:", data);
-                cars = data.map(name => ({name, price: "Цена?"}));
+                console.log("Машины из гаража:", data);
+                
+                cars = data.map(name => ({ 
+                    name: name, 
+                    price: "Цена?" 
+                }));
 
-                // Заполняем список автомобилей
+                // Заполняем выпадающий список
                 const select = document.getElementById('cName');
                 select.innerHTML = '<option value="">Выберите автомобиль</option>';
+                
                 data.forEach(name => {
                     let opt = document.createElement('option');
                     opt.value = name;
@@ -123,9 +127,11 @@
 
                 render();
             })
-            .catch(err => console.error(err));
+            .catch(err => {
+                console.error(err);
+                alert("Ошибка загрузки гаража");
+            });
     }
-
     function render() {
         document.getElementById("grid").innerHTML = cars.map((c, i) => `
             <div class="card" onclick="showDetails(${i})">
