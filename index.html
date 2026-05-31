@@ -121,47 +121,32 @@
         loadCarsData(userId);
     }
 
-    function loadCarsData(userId) {
+        function loadCarsData(userId) {
         fetch(`https://grand-mobile-api.onrender.com/get_cars?user_id=${userId}`)
-            .then(r => {
-                if (!r.ok) throw new Error(`HTTP ${r.status}`);
-                return r.json();
-            })
+            .then(r => r.json())
             .then(data => {
                 console.log("Машины загружены:", data);
                 
-                const select = document.getElementById('cName');
-                select.innerHTML = '<option value="">Выберите автомобиль</option>';
-                
-                cars = [];
+                cars = []; // Сбрасываем массив
                 
                 if (Array.isArray(data) && data.length > 0) {
                     data.forEach(car => {
-                        const name = car.car_name || car.name || "Без названия";
-                        const price = car.price || "—";
-                        
-                        let opt = new Option(name, name);
-                        select.appendChild(opt);
-                        
-                        cars.push({ name: name, price: price });
+                        cars.push({ 
+                            name: car.car_name || "Без названия", 
+                            price: car.price || 0 
+                        });
                     });
-                } else {
-                    document.getElementById("grid").innerHTML = `
-                        <div style="padding:30px; text-align:center; color:#666;">
-                            В вашем гараже пока нет автомобилей
-                        </div>`;
                 }
                 
+                // ВАЖНО: Вызываем рендер всегда, даже если массив пустой (чтобы очистить грид)
                 render();
             })
             .catch(err => {
                 console.error(err);
-                document.getElementById("grid").innerHTML = `
-                    <div style="padding:30px; text-align:center; color:#d93025;">
-                        Ошибка соединения с сервером<br><small>${err.message}</small>
-                    </div>`;
+                document.getElementById("grid").innerHTML = `Ошибка соединения`;
             });
     }
+
 
     function render() {
         const grid = document.getElementById("grid");
