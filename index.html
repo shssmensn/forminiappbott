@@ -104,15 +104,25 @@
         }
 
         // ←←← ИЗМЕНИ НА АКТУАЛЬНЫЙ АДРЕС СВОЕГО БОТА ←←←
-        fetch("https://52f3077bc29d1a75-5-77-201-225.serveusercontent.com/get_cars?user_id=" + userId)
-            .then(r => r.json())
-            .then(data => {
-                console.log("Машины из гаража:", data);
-                
-                cars = data.map(name => ({ 
-                    name: name, 
-                    price: "Цена?" 
-                }));
+        Fetch("https://52f3077bc29d1a75-5-77-201-225.serveusercontent.com/get_cars?user_id=" + userId)
+    .then(r => r.json())
+    .then(data => {
+        console.log("Данные пришли:", data);
+        alert("Данные пришли: " + JSON.stringify(data));
+
+        // ВЕСЬ код, использующий data, переносим СЮДА
+        cars = data.map(car_item => ({ 
+            name: car_item.car_name, // используем правильное имя поля из БД
+            price: "Цена?" 
+        }));
+        
+        // Тут нужно вызвать функцию, которая обновляет интерфейс (например, renderCars())
+        // renderCars(); 
+    })
+    .catch(err => {
+        alert("Ошибка соединения: " + err);
+    });
+
 
                 // Заполняем выпадающий список
                 const select = document.getElementById('cName');
