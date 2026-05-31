@@ -84,78 +84,90 @@
 </div>
 
 <script>
-    console.log("WebApp started. User ID:", tg.initDataUnsafe?.user?.id);
     const tg = window.Telegram.WebApp;
     tg.expand();
     tg.ready();
 
+    console.log("WebApp started. initDataUnsafe:", tg.initDataUnsafe);
+
     let cars = [];
     let currentCarIndex = -1;
 
-
     function getUserId() {
-    console.log("initDataUnsafe:", tg.initDataUnsafe);
-    return tg.initDataUnsafe?.user?.id || null;
-}
-
-function loadGarageCars() {
-    let userId = getUserId();
-
-    if (!userId) {
-        // Пробуем подождать немного — иногда данные приходят с задержкой
-        setTimeout(() => {
-            userId = getUserId();
-            
-            if (!userId) {
-                document.getElementById("grid").innerHTML = `
-                    <div style="padding: 40px 20px; text-align: center; color: #d93025; font-size: 16px;">
-                        ❌ Не удалось получить Telegram ID<br><br>
-                        <b>Откройте Дром через кнопку в боте!</b><br>
-                        (Не через прямую ссылку)
-                    </div>`;
-                return;
-            }
-            loadCarsData(userId);
-        }, 1200);
-        return;
+        console.log("Current initDataUnsafe:", tg.initDataUnsafe);
+        return tg.initDataUnsafe?.user?.id || null;
     }
-    
-    loadCarsData(userId);
-}
 
-function loadCarsData(userId) {
-    fetch(`https://52f3077bc29d1a75-5-77-201-225.serveusercontent.com/get_cars?user_id=${userId}`)
-        .then(r => r.json())
-        .then(data => {
-            console.log("Машины загружены:", data);
-            // ... твой код заполнения select и cars
-            const select = document.getElementById('cName');
-            select.innerHTML = '<option value="">Выберите автомобиль</option>';
-            
-            cars = [];
-            
-            if (Array.isArray(data)) {
-                data.forEach(car => {
-                    const name = car.car_name || car.name;
-                    let opt = new Option(name, name);
-                    select.appendChild(opt);
-                    
-                    cars.push({
-                        name: name,
-                        price: car.price || "—"
+    function loadGarageCars() {
+        let userId = getUserId();
+
+        if (!userId) {
+            setTimeout(() => {
+                userId = getUserId();
+                if (!userId) {
+                    document.getElementById("grid").innerHTML = `
+                        <div style="padding: 40px 20px; text-align: center; color: #d93025; font-size: 16px;">
+                            ❌ Не удалось получить Telegram ID<br><br>
+                            <b>Откройте Дром через кнопку в боте!</b><br>
+                            (Не по прямой ссылке)
+                        </div>`;
+                    return;
+                }
+                loadCarsData(userId);
+            }, 1000);
+            return;
+        }
+        
+        loadCarsData(userId);
+    }
+
+    function loadCarsData(userId) {
+        fetch(`https://52f3077bc29d1a75-5-77-201-225.serveusercontent.com/get_cars?user_id=${userId}`)
+            .then(r => {
+                if (!r.ok) throw new Error(`HTTP ${r.status}`);
+                return r.json();
+            })
+            .then(data => {
+                console.log("Машины загружены:", data);
+                
+                const select = document.getElementById('cName');
+                select.innerHTML = '<option value="">Выберите автомобиль</option>';
+                
+                cars = [];
+                
+                if (Array.isArray(data) && data.length > 0) {
+                    data.forEach(car => {
+                        const name = car.car_name || car.name || "Без названия";
+                        const price = car.price || "—";
+                        
+                        let opt = new Option(name, name);
+                        select.appendChild(opt);
+                        
+                        cars.push({ name: name, price: price });
                     });
-                });
-            }
-            
-            render();
-        })
-        .catch(err => {
-            console.error(err);
-            alert("Ошибка сервера: " + err);
-        });
-}
+                } else {
+                    document.getElementById("grid").innerHTML = `
+                        <div style="padding:30px; text-align:center; color:#666;">
+                            В вашем гараже пока нет автомобилей
+                        </div>`;
+                }
+                
+                render();
+            })
+            .catch(err => {
+                console.error(err);
+                document.getElementById("grid").innerHTML = `
+                    <div style="padding:30px; text-align:center; color:#d93025;">
+                        Ошибка соединения с сервером<br><small>${err.message}</small>
+                    </div>`;
+            });
+    }
+
     function render() {
-        document.getElementById("grid").innerHTML = cars.map((c, i) => `
+        const grid = document.getElementById("grid");
+        if (cars.length === 0) return;
+        
+        grid.innerHTML = cars.map((c, i) => `
             <div class="card" onclick="showDetails(${i})">
                 <button class="del-btn" onclick="event.stopPropagation(); deleteCar(${i})">×</button>
                 <div class="img-box"></div>
@@ -164,7 +176,6 @@ function loadCarsData(userId) {
             </div>
         `).join("");
     }
-
     function showDetails(i) {
         currentCarIndex = i;
         document.getElementById('d-name').innerText = cars[i].name;
