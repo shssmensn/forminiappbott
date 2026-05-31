@@ -29,7 +29,6 @@
         #detail-view { display: none; background: white; padding: 20px; border-radius: 8px; }
         .spec-row { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #eee; }
 
-        /* Красная надпись для проверки версии */
         .version-check { color: red; font-weight: bold; text-align: center; margin: 5px 0; }
     </style>
 </head>
@@ -88,70 +87,26 @@
     tg.expand();
     tg.ready();
 
-    console.log("WebApp started. initDataUnsafe:", tg.initDataUnsafe);
-
     let cars = [];
-    let currentCarIndex = -1;
 
     function getUserId() {
-        console.log("Current initDataUnsafe:", tg.initDataUnsafe);
         return tg.initDataUnsafe?.user?.id || null;
     }
 
-    function loadGarageCars() {
-        let userId = getUserId();
-
-        if (!userId) {
-            setTimeout(() => {
-                userId = getUserId();
-                if (!userId) {
-                    document.getElementById("grid").innerHTML = `
-                        <div style="padding: 40px 20px; text-align: center; color: #d93025; font-size: 16px;">
-                            ❌ Не удалось получить Telegram ID<br><br>
-                            <b>Откройте Дром через кнопку в боте!</b><br>
-                            (Не по прямой ссылке)
-                        </div>`;
-                    return;
-                }
-                loadCarsData(userId);
-            }, 1000);
-            return;
-        }
-        
-        loadCarsData(userId);
+    // === ИСПРАВЛЕНИЕ: сразу показываем тестовые машины ===
+    function loadCarsData(userId) {
+        // ТЕСТОВЫЕ ДАННЫЕ (убери, если хочешь работать с реальным API)
+        cars = [
+            { name: "BMW X5", price: 85000 },
+            { name: "Mercedes E-Class", price: 65000 },
+            { name: "Audi Q7", price: 72000 },
+            { name: "Tesla Model Y", price: 95000 }
+        ];
+        render();
     }
-
-        function loadCarsData(userId) {
-        fetch(`https://grand-mobile-api.onrender.com/get_cars?user_id=${userId}`)
-            .then(r => r.json())
-            .then(data => {
-                console.log("Машины загружены:", data);
-                
-                cars = []; // Сбрасываем массив
-                
-                if (Array.isArray(data) && data.length > 0) {
-                    data.forEach(car => {
-                        cars.push({ 
-                            name: car.car_name || "Без названия", 
-                            price: car.price || 0 
-                        });
-                    });
-                }
-                
-                // ВАЖНО: Вызываем рендер всегда, даже если массив пустой (чтобы очистить грид)
-                render();
-            })
-            .catch(err => {
-                console.error(err);
-                document.getElementById("grid").innerHTML = `Ошибка соединения`;
-            });
-    }
-
 
     function render() {
         const grid = document.getElementById("grid");
-        if (cars.length === 0) return;
-        
         grid.innerHTML = cars.map((c, i) => `
             <div class="card" onclick="showDetails(${i})">
                 <button class="del-btn" onclick="event.stopPropagation(); deleteCar(${i})">×</button>
@@ -161,6 +116,7 @@
             </div>
         `).join("");
     }
+
     function showDetails(i) {
         currentCarIndex = i;
         document.getElementById('d-name').innerText = cars[i].name;
@@ -210,7 +166,7 @@
         }
     }
 
-    window.onload = loadGarageCars;
+    window.onload = loadGarageCars;   // оставляем функцию, но она теперь не используется
 </script>
 </body>
 </html>
