@@ -104,7 +104,7 @@
         }
 
         // ←←← ИЗМЕНИ НА АКТУАЛЬНЫЙ АДРЕС СВОЕГО БОТА ←←←
-        fetch(`https://твой-домен.ru/get_cars?user_id=${userId}`)
+        fetch("https://52f3077bc29d1a75-5-77-201-225.serveusercontent.com/get_cars?user_id=" + userId)
             .then(r => r.json())
             .then(data => {
                 console.log("Машины из гаража:", data);
