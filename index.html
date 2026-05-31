@@ -8,21 +8,17 @@
         body { background-color: #e5e5e5; margin: 0; padding: 0; font-family: sans-serif; display: flex; justify-content: center; }
         .main-container { width: 100%; max-width: 900px; padding: 10px; box-sizing: border-box; }
 
-        /* Шапка */
         .header { background: #1a1a1a; color: white; padding: 10px 15px; display: flex; justify-content: space-between; align-items: center; border-radius: 4px; margin-bottom: 10px; }
         .header-btns { display: flex; gap: 10px; }
         .btn-sell { background: #d93025; color: white; border: none; padding: 8px 12px; border-radius: 4px; font-weight: bold; cursor: pointer; }
         .btn-my { background: white; color: black; border: none; padding: 8px 12px; border-radius: 4px; font-weight: bold; cursor: pointer; }
 
-        /* Фильтры */
         .controls { display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: 8px; margin-bottom: 10px; }
         .controls input, .controls select { padding: 10px; border: none; border-radius: 4px; background: #dcdcdc; }
 
-        /* Баннер */
         .banner { background: #fce883; height: 200px; width: 100%; display: flex; align-items: center; justify-content: space-between; padding: 0 10px; border-radius: 8px; margin-bottom: 15px; box-sizing: border-box; }
         .arrow { background: white; border: none; width: 45px; height: 45px; border-radius: 50%; cursor: pointer; font-weight: bold; font-size: 20px; }
 
-        /* Сетка */
         .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 15px; }
         .card { background: white; padding: 10px; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); position: relative; cursor: pointer; }
         .del-btn { position: absolute; top: 5px; right: 5px; background: #eee; border: none; cursor: pointer; border-radius: 50%; width: 20px; height: 20px; z-index: 10; }
@@ -30,7 +26,6 @@
         .price { background: #d93025; color: white; padding: 3px 8px; border-radius: 4px; font-weight: bold; font-size: 13px; display: inline-block; }
         .name { margin-top: 8px; font-weight: bold; color: #333; font-size: 14px; }
 
-        /* Профиль тачки */
         #detail-view { display: none; background: white; padding: 20px; border-radius: 8px; }
         .spec-row { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #eee; }
     </style>
@@ -113,15 +108,30 @@
             .then(data => {
                 console.log("📦 Машины из базы:", data);
                 
+                if (data.length === 0) {
+                    console.warn("В базе нет машин для этого пользователя");
+                }
+
                 cars = data.map(carName => ({
                     name: carName,
                     price: "Цена?"
                 }));
 
+                // Заполняем селект
+                const select = document.getElementById('cName');
+                select.innerHTML = '<option value="">Выберите автомобиль</option>';
+                
+                data.forEach(carName => {
+                    let option = document.createElement("option");
+                    option.value = carName;
+                    option.textContent = carName;
+                    select.appendChild(option);
+                });
+
                 render();
             })
             .catch(err => {
-                console.error("Ошибка загрузки:", err);
+                console.error("Ошибка загрузки машин:", err);
             });
     }
 
@@ -160,10 +170,23 @@
     function addCar() {
         let name = document.getElementById('cName').value;
         let price = document.getElementById('cPrice').value;
-        if (!name || !price) return alert("Введите данные!");
+
+        console.log("Попытка добавить:", { name, price });
+
+        if (!name) {
+            alert("Выберите автомобиль!");
+            return;
+        }
+        if (!price) {
+            alert("Введите цену!");
+            return;
+        }
 
         const userId = getUserId();
-        if (!userId) return alert("Ошибка: Telegram ID не найден");
+        if (!userId) {
+            alert("Ошибка: Telegram ID не найден");
+            return;
+        }
 
         tg.sendData(JSON.stringify({
             action: 'add_car',
@@ -175,6 +198,7 @@
         cars.push({name, price});
         render();
         document.getElementById('modal').style.display = 'none';
+        alert("Объявление успешно добавлено!");
     }
 
     function deleteCar(i) {
@@ -184,7 +208,7 @@
         }
     }
 
-    // Запуск при загрузке
+    // Запуск
     window.onload = loadGarageCars;
 </script>
 </body>
