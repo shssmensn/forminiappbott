@@ -90,7 +90,16 @@
 
     console.log("WebApp started. initDataUnsafe:", tg.initDataUnsafe);
 
-    let cars = [];
+        // Добавляем тестовые машины для прикола
+    let cars = [
+        { name: "Bentley Bentayga Mansory", price: 33000000 },
+        { name: "Audi RS6 DTM", price: 7000000 },
+        { name: "Magnaris-24 Ulba", price: 4000000 },
+        { name: "Magnaris 2101", price: 2500000 },
+        { name: "BMW M5 F90", price: 12000000 },
+        { name: "Жигули 2107 (Легенда)", price: 150000 }
+    ];
+
     let currentCarIndex = -1;
 
     function getUserId() {
