@@ -93,7 +93,10 @@ alert("WebApp: " + typeof window.Telegram.WebApp);
     "<pre>" +
     JSON.stringify(tg.initDataUnsafe, null, 2) +
     "</pre>";
-    alert(JSON.stringify(tg.initDataUnsafe));
+    alert(
+    "initDataUnsafe = " +
+    JSON.stringify(tg.initDataUnsafe)
+);
 
     let cars = JSON.parse(localStorage.getItem('myCars')) || [];
 let currentCarIndex = -1;
